@@ -1,32 +1,31 @@
-import faiss
+import chromadb
 import numpy as np
 import re
 from sentence_transformers import SentenceTransformer, CrossEncoder
 from rank_bm25 import BM25Okapi
-from embedding_store import load_financial_data, FAISS_INDEX_PATH
+from embedding_store import load_financial_data
 
+# Load embedding and ranking models
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 cross_encoder = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
 
-def load_faiss_index():
-    """
-    Loads the FAISS index from disk.
-    """
-    return faiss.read_index(FAISS_INDEX_PATH)
-
+# Load financial documents
 financial_documents = load_financial_data()
 tokenized_corpus = [doc.split() for doc in financial_documents]
 bm25 = BM25Okapi(tokenized_corpus)
 
-def retrieve_faiss(query, top_k=15):
+# ChromaDB Setup
+chroma_client = chromadb.PersistentClient(path="./vector_db/chromadb_store")
+collection = chroma_client.get_or_create_collection(name="financial_docs")
+
+def retrieve_chromadb(query, top_k=15):
     """
-    Retrieves the most relevant financial statements using FAISS.
+    Retrieves the most relevant financial statements using ChromaDB.
     """
-    index = load_faiss_index()
-    query_embedding = embedding_model.encode([query], convert_to_numpy=True)
-    distances, indices = index.search(query_embedding, top_k)
+    query_embedding = embedding_model.encode([query]).tolist()
+    results = collection.query(query_embeddings=query_embedding, n_results=top_k)["metadatas"]
     
-    return [financial_documents[i] for i in indices[0] if i < len(financial_documents)]
+    return [res for res in results if res] if results else []
 
 def retrieve_bm25(query, top_k=10):
     """
@@ -42,7 +41,6 @@ def extract_financial_data(text):
     """
     Extracts key financial figures from retrieved text.
     """
-
     finance_terms = {
         "net_income": r"(Net (income|loss).*?\$?(-?\d+[\d,.]*)\s?(billion|million)?)",
         "revenue": r"(Revenue[s]?.*?\$?(-?\d+[\d,.]*)\s?(billion|million)?)",
@@ -79,11 +77,11 @@ def re_rank_results(query, retrieved_docs):
 
 def retrieve_answer(query):
     """
-    Executes the full retrieval pipeline: FAISS + BM25 + Cross-Encoder Re-Ranking.
+    Executes the full retrieval pipeline: ChromaDB + BM25 + Cross-Encoder Re-Ranking.
     Returns answer + confidence score.
     """
-    faiss_results = retrieve_faiss(query)
+    chromadb_results = retrieve_chromadb(query)
     bm25_results = retrieve_bm25(query)
-    combined_results = list(set(faiss_results + bm25_results))
+    combined_results = list(set(chromadb_results + bm25_results))
 
     return re_rank_results(query, combined_results)

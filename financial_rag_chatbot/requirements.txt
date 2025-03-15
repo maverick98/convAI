@@ -2,9 +2,10 @@
 streamlit==1.33.0  # Latest stable version
 
 # Vector Database (Use FAISS or ChromaDB)
-faiss-cpu==1.7.2  # Compatible with Windows/Linux
-chromadb==0.4.24  # Alternative if FAISS doesn't work
-hnswlib==0.7.0  # Needed for ChromaDB vector search
+chromadb==0.4.24  # Use ChromaDB instead of FAISS
+hnswlib==0.7.0  # Required for ChromaDB
+
+
 
 # Data Handling
 pandas==2.2.2
