@@ -31,5 +31,5 @@ faiss-cpu==1.7.4  # Ensures compatibility with NumPy
 
 # Avoid OpenMP Conflicts
 nomkl  # Disables MKL to prevent OpenMP issues
-mkl-service==2.4.0  # Ensures proper MKL linkage
+#mkl-service==2.4.0  # Ensures proper MKL linkage
 scipy==1.13.0  # Latest stable version for compatibility
