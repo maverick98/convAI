@@ -1,0 +1,24 @@
+Query: how much Operating margins in 2023?
+
+Answer: Revenues $19,127
+
+Confidence Score: 5.30
+
+Query: How much Revenue from contracts with customers in 2023?
+
+Answer: revenues from contracts with customers 17,241
+
+Confidence Score: 8.58
+
+
+
+
+Query: What was Boeing’s revenue in 2023?
+
+Answer: revenue through 2024
+
+Confidence Score: 4.82
+
+
+What is the capital of France?
+
