@@ -1,22 +1,22 @@
 # Web Framework
 streamlit==1.33.0  # Latest stable version
 
-# Vector Database
-chromadb==0.4.24  
-hnswlib==0.7.0
+# Vector Database (Use FAISS or ChromaDB)
+faiss-cpu==1.7.2  # Compatible with Windows/Linux
+chromadb==0.4.24  # Alternative if FAISS doesn't work
+hnswlib==0.7.0  # Needed for ChromaDB vector search
 
 # Data Handling
 pandas==2.2.2
 numpy==1.26.4
 scikit-learn==1.4.2
+scipy==1.13.0  # Ensures compatibility with NumPy & ML packages
 
 # PDF Processing
 PyPDF2==3.0.1
 
-sentence-transformers==2.2.2
-
-
 # NLP and Embeddings
+sentence-transformers==2.2.2
 spacy==3.7.2
 spacy-transformers==1.3.4  # Needed for transformer-based embeddings
 
@@ -24,12 +24,5 @@ spacy-transformers==1.3.4  # Needed for transformer-based embeddings
 torch==2.3.0
 torchaudio==2.3.0
 
-# FAISS for Vector Search
-faiss-cpu==1.7.4  # Ensures compatibility with NumPy
-
-
-
-# Avoid OpenMP Conflicts
+# Avoid OpenMP Conflicts (Only If FAISS Fails)
 nomkl  # Disables MKL to prevent OpenMP issues
-#mkl-service==2.4.0  # Ensures proper MKL linkage
-scipy==1.13.0  # Latest stable version for compatibility
