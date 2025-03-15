@@ -1,22 +1,26 @@
 import os
 import PyPDF2
-import faiss
+import chromadb
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from nltk.tokenize import sent_tokenize
 
 # Define directories
 DATA_FOLDER = "data/"
-MODEL_FOLDER = "model/"
-FAISS_INDEX_PATH = os.path.join(MODEL_FOLDER, "financial_embeddings.index")
+VECTOR_DB_FOLDER = "vector_db/"
+CHROMADB_PATH = os.path.join(VECTOR_DB_FOLDER, "chromadb_store")
 
 # Load the Sentence Transformer model for embedding generation
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
+# Initialize ChromaDB client
+chroma_client = chromadb.PersistentClient(path=CHROMADB_PATH)
+collection = chroma_client.get_or_create_collection(name="financial_docs")
+
 def extract_text_from_pdf(pdf_path):
     """
     Extracts text from a PDF file and splits it into smaller text chunks for better retrieval.
-    Uses sentence tokenization and groups sentences into smaller segments.
+    Uses sentence tokenization and groups sentences into 3-sentence chunks.
     """
     with open(pdf_path, "rb") as file:
         reader = PyPDF2.PdfReader(file)
@@ -42,7 +46,7 @@ def load_financial_data():
     all_chunks = []
     for pdf in pdf_files:
         pdf_path = os.path.join(DATA_FOLDER, pdf)
-        print(f"Extracting text from {pdf_path}...")
+        print(f"📄 Extracting text from {pdf_path}...")
         text_chunks = extract_text_from_pdf(pdf_path)
         all_chunks.extend(text_chunks)
 
@@ -50,23 +54,20 @@ def load_financial_data():
 
 def store_embeddings():
     """
-    Generates embeddings for all financial document chunks and stores them in FAISS.
+    Generates embeddings for all financial document chunks and stores them in ChromaDB.
     """
-    os.makedirs(MODEL_FOLDER, exist_ok=True)
+    os.makedirs(VECTOR_DB_FOLDER, exist_ok=True)
 
     text_chunks = load_financial_data()
-    print("Generating embeddings...")
+    print("🔄 Generating embeddings...")
 
-    embeddings = embedding_model.encode(text_chunks, convert_to_numpy=True)
-    dimension = embeddings.shape[1]
+    embeddings = embedding_model.encode(text_chunks).tolist()
 
-    # Create FAISS index and store embeddings
-    index = faiss.IndexFlatL2(dimension)
-    index.add(embeddings)
+    # Store in ChromaDB
+    for i, (text, embedding) in enumerate(zip(text_chunks, embeddings)):
+        collection.add(ids=[str(i)], embeddings=[embedding], metadatas=[{"text": text}])
 
-    # Save the FAISS index
-    faiss.write_index(index, FAISS_INDEX_PATH)
-    print(f"Stored {len(embeddings)} embeddings in FAISS at {FAISS_INDEX_PATH}")
+    print(f"✅ Stored {len(embeddings)} embeddings in ChromaDB at {CHROMADB_PATH}")
 
 if __name__ == "__main__":
     store_embeddings()
