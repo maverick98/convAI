@@ -82,6 +82,11 @@ def retrieve_answer(query):
     """
     chromadb_results = retrieve_chromadb(query)
     bm25_results = retrieve_bm25(query)
-    combined_results = list(set(chromadb_results + bm25_results))
+    # Flatten ChromaDB results (it returns lists inside a list)
+    chromadb_results_flat = [item for sublist in chromadb_results for item in sublist]
+
+    # Combine results and remove duplicates
+    combined_results = list(set(chromadb_results_flat + bm25_results))
+
 
     return re_rank_results(query, combined_results)
