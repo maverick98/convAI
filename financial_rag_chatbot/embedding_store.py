@@ -14,7 +14,10 @@ CHROMADB_PATH = os.path.join(VECTOR_DB_FOLDER, "chromadb_store")
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # Initialize ChromaDB client
-chroma_client = chromadb.PersistentClient(path=CHROMADB_PATH)
+#chroma_client = chromadb.PersistentClient(path=CHROMADB_PATH)
+chroma_client = chromadb.PersistentClient(path="./vector_db/chromadb_store")
+
+
 collection = chroma_client.get_or_create_collection(name="financial_docs")
 
 def extract_text_from_pdf(pdf_path):

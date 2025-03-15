@@ -16,6 +16,7 @@ bm25 = BM25Okapi(tokenized_corpus)
 
 # ChromaDB Setup
 chroma_client = chromadb.PersistentClient(path="./vector_db/chromadb_store")
+
 collection = chroma_client.get_or_create_collection(name="financial_docs")
 
 def retrieve_chromadb(query, top_k=15):

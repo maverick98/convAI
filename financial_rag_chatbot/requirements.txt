@@ -2,7 +2,9 @@
 streamlit==1.33.0  # Latest stable version
 
 # Vector Database (Use FAISS or ChromaDB)
-chromadb==0.4.24  # Use ChromaDB instead of FAISS
+chromadb==0.4.24  # Ensure latest ChromaDB
+duckdb==0.9.2  # Use DuckDB instead of SQLite for ChromaDB
+
 hnswlib==0.7.0  # Required for ChromaDB
 
 
